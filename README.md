@@ -1,1 +1,1 @@
-# balance-service
+# Test task for IQOption
