@@ -46,4 +46,13 @@ class Money
     {
         return new self($this->amount * (-1), $this->currency);
     }
+
+    public function greaterThan(Money $amount): bool
+    {
+        if ($this->currency !== $amount->currency) {
+            throw new \InvalidArgumentException('Can not compare different currencies');
+        }
+
+        return $this->amount > $amount->amount;
+    }
 }

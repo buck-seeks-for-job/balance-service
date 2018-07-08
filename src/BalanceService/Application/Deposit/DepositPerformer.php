@@ -36,7 +36,7 @@ class DepositPerformer
 
     public function deposit(DepositRequest $depositRequest): void
     {
-        $userAccount = $this->accountRepository->findById($depositRequest->getAccountId());
+        $userAccount = $this->accountRepository->findUserAccountById($depositRequest->getAccountId());
         $bankAccount = $this->accountRepository
             ->findNominalAccountByOwnerAndCurrency('bank', $depositRequest->getAmount()->getCurrency());
 

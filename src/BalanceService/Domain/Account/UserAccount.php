@@ -5,7 +5,9 @@ namespace Iqoption\BalanceService\Domain\Account;
 
 use Doctrine\ORM\Mapping as ORM;
 use Iqoption\BalanceService\Application\Exception\CurrencyMismatchException;
+use Iqoption\BalanceService\Application\Exception\NotEnoughMoneyException;
 use Iqoption\BalanceService\Common\Money;
+use Iqoption\BalanceService\Domain\BalanceCalculator;
 use Iqoption\BalanceService\Domain\Transaction;
 
 /**
@@ -37,5 +39,23 @@ class UserAccount extends Account
         }
 
         return Transaction::deposit($transactionId, $nominalAccount->id, $this->id, $amount);
+    }
+
+    public function createWithdrawTransaction(
+        string $transactionId,
+        Money $amount,
+        NominalAccount $nominalAccount,
+        BalanceCalculator $balanceCalculator
+    ): Transaction {
+        if ($this->currency !== $amount->getCurrency()) {
+            throw new CurrencyMismatchException;
+        }
+
+        $balance = $balanceCalculator->calculate($this->id);
+        if ($amount->greaterThan($balance)) {
+            throw new NotEnoughMoneyException;
+        }
+
+        return Transaction::withdraw($transactionId, $this->id, $nominalAccount->id, $amount);
     }
 }

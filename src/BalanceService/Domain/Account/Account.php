@@ -40,4 +40,9 @@ abstract class Account
      * @ORM\Column(name="currency", type="string", length=3)
      */
     protected $currency;
+
+    public function getCurrency(): string
+    {
+        return $this->currency;
+    }
 }

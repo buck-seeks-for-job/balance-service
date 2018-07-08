@@ -13,6 +13,7 @@ use Iqoption\BalanceService\Common\Money;
 class Transaction
 {
     public const TYPE_DEPOSIT = 'deposit';
+    public const TYPE_WITHDRAW = 'withdraw';
     /**
      * @var string
      *
@@ -46,6 +47,18 @@ class Transaction
     {
         $me = new self;
         $me->type = self::TYPE_DEPOSIT;
+        $me->id = $id;
+        $me->createdAt = new \DateTimeImmutable('now');
+        $me->entries[] = new Entry($fromAccountId, $amount->inverse(), $me->createdAt, $me);
+        $me->entries[] = new Entry($toAccountId, $amount, $me->createdAt, $me);
+
+        return $me;
+    }
+
+    public static function withdraw(string $id, int $fromAccountId, int $toAccountId, Money $amount): self
+    {
+        $me = new self;
+        $me->type = self::TYPE_WITHDRAW;
         $me->id = $id;
         $me->createdAt = new \DateTimeImmutable('now');
         $me->entries[] = new Entry($fromAccountId, $amount->inverse(), $me->createdAt, $me);

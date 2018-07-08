@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Iqoption\BalanceService\Infrastructure\Persistence;
 
+use Doctrine\DBAL\LockMode;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\NoResultException;
 use Iqoption\BalanceService\Application\Exception\AccountNotFoundException;
@@ -10,6 +11,7 @@ use Iqoption\BalanceService\Application\Exception\NoNominalAccountException;
 use Iqoption\BalanceService\Domain\Account\Account;
 use Iqoption\BalanceService\Domain\Account\AccountRepository;
 use Iqoption\BalanceService\Domain\Account\NominalAccount;
+use Iqoption\BalanceService\Domain\Account\UserAccount;
 
 class DoctrineAccountRepository extends EntityRepository implements AccountRepository
 {
@@ -18,11 +20,11 @@ class DoctrineAccountRepository extends EntityRepository implements AccountRepos
         $this->getEntityManager()->persist($account);
     }
 
-    public function findById(int $id): Account
+    public function findUserAccountById(int $id): UserAccount
     {
         $account = $this->find($id);
 
-        if ($account === null) {
+        if ($account === null || !($account instanceof UserAccount)) {
             throw new AccountNotFoundException;
         }
 
@@ -45,5 +47,16 @@ class DoctrineAccountRepository extends EntityRepository implements AccountRepos
         } catch (NoResultException $e) {
             throw new NoNominalAccountException;
         }
+    }
+
+    public function findAndLockById(int $id): UserAccount
+    {
+        $account = $this->find($id, LockMode::PESSIMISTIC_WRITE);
+
+        if ($account === null || !($account instanceof UserAccount)) {
+            throw new AccountNotFoundException;
+        }
+
+        return $account;
     }
 }
