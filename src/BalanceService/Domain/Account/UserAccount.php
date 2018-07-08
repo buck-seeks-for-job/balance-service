@@ -80,4 +80,9 @@ class UserAccount extends Account
 
         return Transaction::transfer($transactionId, $this->id, $toAccount->id, $amount);
     }
+
+    public function getId(): int
+    {
+        return $this->id;
+    }
 }
