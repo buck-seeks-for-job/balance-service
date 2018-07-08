@@ -9,16 +9,20 @@ use Iqoption\BalanceService\Application\Exception\CurrencyMismatchException;
 use Iqoption\BalanceService\Application\Exception\NoNominalAccountException;
 use Iqoption\BalanceService\Common\Money;
 use Iqoption\BalanceService\Domain\Account\Account;
-use Iqoption\BalanceService\Domain\Account\NominalAccount;
-use Iqoption\BalanceService\Domain\Account\UserAccount;
 use Iqoption\BalanceService\Domain\Entry;
 use Iqoption\BalanceService\Domain\Transaction;
 use Iqoption\BalanceService\Infrastructure\Persistence\DoctrineTransactionManager;
 use Iqoption\Test\TestUtility\DoctrineSqliteTestCase;
-use PHPUnit\Framework\TestCase;
+use Iqoption\Test\Unit\BalanceService\AccountAwareTestCase;
+use Iqoption\Test\Unit\BalanceService\BalanceAwareTestCase;
+use Iqoption\Test\Unit\BalanceService\TransactionAwareTestCase;
 
 class DepositPerformerTest extends DoctrineSqliteTestCase
 {
+    use AccountAwareTestCase;
+    use TransactionAwareTestCase;
+    use BalanceAwareTestCase;
+
     /**
      * @var DepositPerformer
      */
@@ -95,7 +99,7 @@ class DepositPerformerTest extends DoctrineSqliteTestCase
      */
     public function deposit_GivenRequestWithIncorrectCurrency_ThrowsCertainException()
     {
-        $nominalAccountId = $this->givenNominalAccount($ownerId = 'bank', 'USD');
+        $this->givenNominalAccount($ownerId = 'bank', 'USD');
         $accountId = $this->givenUserAccount($name = 'Robin Bobin', 'RUB');
 
         $this->expectException(CurrencyMismatchException::class);
@@ -113,69 +117,5 @@ class DepositPerformerTest extends DoctrineSqliteTestCase
             self::getClassDirectory(Transaction::class),
             self::getClassDirectory(Entry::class)
         ];
-    }
-
-    private function givenNominalAccount(string $ownerId, string $currency): int
-    {
-        $account = new NominalAccount($ownerId, $currency);
-
-        self::$entityManager->persist($account);
-        self::$entityManager->flush();
-
-        return (int)$this->getFieldFromAccount($account, 'id');
-    }
-
-    private function givenUserAccount(string $name, string $currency)
-    {
-        $account = new UserAccount($name, $currency);
-
-        self::$entityManager->persist($account);
-        self::$entityManager->flush();
-
-        return (int)$this->getFieldFromAccount($account, 'id');
-    }
-
-    private function getFieldFromAccount(Account $account, string $name)
-    {
-        $reflection = new \ReflectionProperty(get_class($account), $name);
-        $reflection->setAccessible(true);
-
-        return $reflection->getValue($account);
-    }
-
-    private function assertThatTransactionPersisted(string $id, array $expectedFieldMap): void
-    {
-        $transaction = self::$entityManager->find(Transaction::class, $id);
-
-        foreach ($expectedFieldMap as $name => $expectedValue) {
-            if ($expectedValue instanceof \DateTimeInterface) {
-                $actualValue = $this->getFieldFromTransaction($transaction, $name);
-
-                assertThat(abs($actualValue->getTimestamp() - $expectedValue->getTimestamp()), lessThan(10));
-            } else {
-                assertThat($this->getFieldFromTransaction($transaction, $name), is(equalTo($expectedValue)));
-            }
-        }
-    }
-
-    private function getFieldFromTransaction(Transaction $transaction, string $name)
-    {
-        $reflection = new \ReflectionProperty(Transaction::class, $name);
-        $reflection->setAccessible(true);
-
-        return $reflection->getValue($transaction);
-    }
-
-    private function assertThatAccountHasCertainBalance(int $accountId, Money $expectedAmount): void
-    {
-        $qb = self::$entityManager->createQueryBuilder();
-        $actualAmount = $qb->select('SUM(e.amount.amount)')
-            ->from(Entry::class, 'e')
-            ->where('e.accountId = :accountId')
-            ->setParameter('accountId', $accountId)
-            ->getQuery()
-            ->getSingleScalarResult();
-
-        assertThat($actualAmount, is(equalTo($expectedAmount->getAmount())));
     }
 }
