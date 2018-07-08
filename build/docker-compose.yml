@@ -1,0 +1,46 @@
+version: '3'
+
+#networks:
+#  default:
+#    external:
+#      name: iqoption
+
+services:
+  balance-service-postgres:
+    image: postgres:10
+    networks:
+      default:
+        aliases:
+          - balance-service-postgres
+    volumes:
+      - /var/lib/postgres
+    environment:
+      POSTGRES_DB: balance
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+
+  balance-service-rabbitmq:
+    image: rabbitmq:3.6-management-alpine
+    networks:
+      default:
+        aliases:
+          - balance-service-rabbitmq
+    environment:
+      HOSTNAME: localhost
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin
+      RABBITMQ_DEFAULT_VHOST: balance-service
+
+  balance-service-php-cli:
+    build:
+      context: ../
+      dockerfile: build/php/Dockerfile
+    depends_on:
+      - balance-service-postgres
+    volumes:
+      - ../:/var/billing/
+      - $SSH_AUTH_SOCK:/tmp/agent.sock
+    environment:
+      - SSH_AUTH_SOCK=/tmp/agent.sock
+    env_file:
+      - parameters.env
