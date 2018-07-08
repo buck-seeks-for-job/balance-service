@@ -14,6 +14,8 @@ class Transaction
 {
     public const TYPE_DEPOSIT = 'deposit';
     public const TYPE_WITHDRAW = 'withdraw';
+    public const TYPE_TRANSFER = 'transfer';
+
     /**
      * @var string
      *
@@ -45,25 +47,25 @@ class Transaction
 
     public static function deposit(string $id, int $fromAccountId, int $toAccountId, Money $amount): self
     {
-        $me = new self;
-        $me->type = self::TYPE_DEPOSIT;
-        $me->id = $id;
-        $me->createdAt = new \DateTimeImmutable('now');
-        $me->entries[] = new Entry($fromAccountId, $amount->inverse(), $me->createdAt, $me);
-        $me->entries[] = new Entry($toAccountId, $amount, $me->createdAt, $me);
-
-        return $me;
+        return new self($id, self::TYPE_DEPOSIT, $fromAccountId, $toAccountId, $amount);
     }
 
     public static function withdraw(string $id, int $fromAccountId, int $toAccountId, Money $amount): self
     {
-        $me = new self;
-        $me->type = self::TYPE_WITHDRAW;
-        $me->id = $id;
-        $me->createdAt = new \DateTimeImmutable('now');
-        $me->entries[] = new Entry($fromAccountId, $amount->inverse(), $me->createdAt, $me);
-        $me->entries[] = new Entry($toAccountId, $amount, $me->createdAt, $me);
+        return new self($id, self::TYPE_WITHDRAW, $fromAccountId, $toAccountId, $amount);
+    }
 
-        return $me;
+    public static function transfer(string $id, int $fromAccountId, int $toAccountId, Money $amount): self
+    {
+        return new self($id, self::TYPE_TRANSFER, $fromAccountId, $toAccountId, $amount);
+    }
+
+    private function __construct(string $id, string $type, int $fromAccountId, int $toAccountId, Money $amount)
+    {
+        $this->id = $id;
+        $this->type = $type;
+        $this->createdAt = new \DateTimeImmutable('now');
+        $this->entries[] = new Entry($fromAccountId, $amount->inverse(), $this->createdAt, $this);
+        $this->entries[] = new Entry($toAccountId, $amount, $this->createdAt, $this);
     }
 }

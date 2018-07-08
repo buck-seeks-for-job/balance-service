@@ -87,7 +87,7 @@ class DepositPerformerTest extends DoctrineSqliteTestCase
         ));
 
         $this->assertThatTransactionPersisted($transactionId, [
-            'type' => 'deposit',
+            'type' => Transaction::TYPE_DEPOSIT,
             'createdAt' => $now,
         ]);
         $this->assertThatAccountHasCertainBalance($accountId, $amount);

@@ -92,7 +92,7 @@ class WithdrawPerformerTest extends DoctrineSqliteTestCase
         ));
 
         $this->assertThatTransactionPersisted($transactionId, [
-            'type' => 'withdraw',
+            'type' => Transaction::TYPE_WITHDRAW,
             'createdAt' => $now,
         ]);
         $this->assertThatAccountHasCertainBalance($accountId, new Money(0, 'RUB'));

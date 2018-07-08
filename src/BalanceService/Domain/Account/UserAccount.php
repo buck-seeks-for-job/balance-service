@@ -58,4 +58,26 @@ class UserAccount extends Account
 
         return Transaction::withdraw($transactionId, $this->id, $nominalAccount->id, $amount);
     }
+
+    public function createTransferTransaction(
+        string $transactionId,
+        Money $amount,
+        UserAccount $toAccount,
+        BalanceCalculator $balanceCalculator
+    ): Transaction {
+        if ($this->currency !== $amount->getCurrency()) {
+            throw new CurrencyMismatchException;
+        }
+
+        if ($toAccount->currency !== $amount->getCurrency()) {
+            throw new CurrencyMismatchException;
+        }
+
+        $balance = $balanceCalculator->calculate($this->id);
+        if ($amount->greaterThan($balance)) {
+            throw new NotEnoughMoneyException;
+        }
+
+        return Transaction::transfer($transactionId, $this->id, $toAccount->id, $amount);
+    }
 }
