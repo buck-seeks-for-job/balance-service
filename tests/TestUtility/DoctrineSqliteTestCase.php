@@ -4,12 +4,14 @@ declare(strict_types=1);
 namespace Iqoption\Test\TestUtility;
 
 use Doctrine\Common\Annotations\AnnotationReader;
+use Doctrine\Common\Annotations\AnnotationRegistry;
 use Doctrine\Common\Annotations\CachedReader;
 use Doctrine\Common\Cache\ArrayCache;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Mapping\Driver\AnnotationDriver;
 use Doctrine\ORM\Tools\SchemaTool;
 use Doctrine\ORM\Tools\Setup;
+use JMS\Serializer\Annotation\Type;
 use PDO;
 use PHPUnit\Framework\TestCase;
 
@@ -80,6 +82,10 @@ abstract class DoctrineSqliteTestCase extends TestCase
         $config = Setup::createAnnotationMetadataConfiguration($paths, true);
         $annotationReader = new AnnotationReader();
         $annotationDriver = new AnnotationDriver(new CachedReader($annotationReader, new ArrayCache()), $paths);
+        AnnotationRegistry::registerAutoloadNamespace(
+            'JMS\Serializer\Annotation',
+            __DIR__ . '/../../vendor/jms/serializer/src'
+        );
         $config->setMetadataDriverImpl($annotationDriver);
 
         if (!self::$pdo) {

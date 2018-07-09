@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Iqoption\BalanceService\Common;
 
+use JMS\Serializer\Annotation as JMS;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -16,6 +17,7 @@ class Money
      * @var int
      *
      * @ORM\Column(name="amount", type="bigint")
+     * @JMS\Type("integer")
      */
     private $amount;
 
@@ -23,6 +25,7 @@ class Money
      * @var string
      *
      * @ORM\Column(name="currency", type="string", length=3)
+     * @JMS\Type("string")
      */
     private $currency;
 
