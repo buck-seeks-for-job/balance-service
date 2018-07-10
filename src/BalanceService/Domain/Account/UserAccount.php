@@ -8,7 +8,7 @@ use Iqoption\BalanceService\Application\Exception\CurrencyMismatchException;
 use Iqoption\BalanceService\Application\Exception\NotEnoughMoneyException;
 use Iqoption\BalanceService\Common\Money;
 use Iqoption\BalanceService\Domain\BalanceCalculator;
-use Iqoption\BalanceService\Domain\Transaction;
+use Iqoption\BalanceService\Domain\Transaction\Transaction;
 
 /**
  * @ORM\Entity

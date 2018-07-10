@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Iqoption\Test\Unit\BalanceService;
 
-use Iqoption\BalanceService\Domain\Transaction;
+use Iqoption\BalanceService\Domain\Transaction\Transaction;
 
 trait TransactionAwareTestCase
 {

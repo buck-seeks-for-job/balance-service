@@ -9,19 +9,23 @@ use Iqoption\BalanceService\Application\Exception\CurrencyMismatchException;
 use Iqoption\BalanceService\Application\Exception\NoNominalAccountException;
 use Iqoption\BalanceService\Common\Money;
 use Iqoption\BalanceService\Domain\Account\Account;
-use Iqoption\BalanceService\Domain\Entry;
-use Iqoption\BalanceService\Domain\Transaction;
+use Iqoption\BalanceService\Domain\Event\Event;
+use Iqoption\BalanceService\Domain\Event\EventPublisher;
+use Iqoption\BalanceService\Domain\Transaction\Entry;
+use Iqoption\BalanceService\Domain\Transaction\Transaction;
 use Iqoption\BalanceService\Infrastructure\Persistence\DoctrineTransactionManager;
 use Iqoption\Test\TestUtility\DoctrineSqliteTestCase;
 use Iqoption\Test\Unit\BalanceService\AccountAwareTestCase;
 use Iqoption\Test\Unit\BalanceService\BalanceAwareTestCase;
+use Iqoption\Test\Unit\BalanceService\EventPublisherAwareTestCase;
 use Iqoption\Test\Unit\BalanceService\TransactionAwareTestCase;
 
-class DepositPerformerTest extends DoctrineSqliteTestCase
+class DepositPerformerTest extends DoctrineSqliteTestCase implements EventPublisher
 {
     use AccountAwareTestCase;
     use TransactionAwareTestCase;
     use BalanceAwareTestCase;
+    use EventPublisherAwareTestCase;
 
     /**
      * @var DepositPerformer
@@ -37,7 +41,8 @@ class DepositPerformerTest extends DoctrineSqliteTestCase
             self::$entityManager->getRepository(Transaction::class),
             new DoctrineTransactionManager(
                 self::$entityManager
-            )
+            ),
+            $this
         );
     }
 
@@ -74,7 +79,7 @@ class DepositPerformerTest extends DoctrineSqliteTestCase
     /**
      * @test
      */
-    public function deposit_GivenCorrectRequest_CreatesTransactionWithCorrectEntries()
+    public function deposit_GivenCorrectRequest_CreatesTransactionWithCorrectEntriesPublishesCertainEvent()
     {
         $nominalAccountId = $this->givenNominalAccount($ownerId = 'bank', $currency = 'RUB');
         $accountId = $this->givenUserAccount($name = 'Robin Bobin', $currency);
@@ -89,9 +94,11 @@ class DepositPerformerTest extends DoctrineSqliteTestCase
         $this->assertThatTransactionPersisted($transactionId, [
             'type' => Transaction::TYPE_DEPOSIT,
             'createdAt' => $now,
+            'amount' => $amount
         ]);
         $this->assertThatAccountHasCertainBalance($accountId, $amount);
         $this->assertThatAccountHasCertainBalance($nominalAccountId, new Money(-1000 * Money::MULTIPLIER, 'RUB'));
+        $this->assertThatCertainEventPublished(new Event(Event::TYPE_DEPOSIT, $accountId, $amount));
     }
 
     /**

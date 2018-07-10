@@ -1,10 +1,11 @@
 <?php
 declare(strict_types=1);
 
-namespace Iqoption\BalanceService\Domain;
+namespace Iqoption\BalanceService\Domain\Transaction;
 
 use Iqoption\BalanceService\Common\Money;
 use Doctrine\ORM\Mapping as ORM;
+use Iqoption\BalanceService\Domain\Transaction\Transaction;
 
 /**
  * @ORM\Entity()
@@ -49,7 +50,7 @@ class Entry
     /**
      * @var Transaction
      *
-     * @ORM\ManyToOne(targetEntity="Iqoption\BalanceService\Domain\Transaction", inversedBy="entries")
+     * @ORM\ManyToOne(targetEntity="Iqoption\BalanceService\Domain\Transaction\Transaction", inversedBy="entries")
      * @ORM\JoinColumn(name="transaction_id", referencedColumnName="id")
      */
     private $transaction;

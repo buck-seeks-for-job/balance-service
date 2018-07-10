@@ -5,7 +5,9 @@ namespace Iqoption\BalanceService\Application\Deposit;
 
 use Iqoption\BalanceService\Domain\Account\AccountRepository;
 use Iqoption\BalanceService\Domain\DatabaseTransactionManager;
-use Iqoption\BalanceService\Domain\TransactionRepostory;
+use Iqoption\BalanceService\Domain\Event\Event;
+use Iqoption\BalanceService\Domain\Event\EventPublisher;
+use Iqoption\BalanceService\Domain\Transaction\TransactionRepostory;
 
 class DepositPerformer
 {
@@ -24,14 +26,21 @@ class DepositPerformer
      */
     private $databaseTransactionManager;
 
+    /**
+     * @var EventPublisher
+     */
+    private $eventPublisher;
+
     public function __construct(
         AccountRepository $accountRepository,
         TransactionRepostory $transactionRepostory,
-        DatabaseTransactionManager $transactionManager
+        DatabaseTransactionManager $transactionManager,
+        EventPublisher $eventPublisher
     ) {
         $this->accountRepository = $accountRepository;
         $this->transactionRepostory = $transactionRepostory;
         $this->databaseTransactionManager = $transactionManager;
+        $this->eventPublisher = $eventPublisher;
     }
 
     public function deposit(DepositRequest $depositRequest): void
@@ -49,5 +58,11 @@ class DepositPerformer
         $this->databaseTransactionManager->transactional(function () use ($transaction) {
             $this->transactionRepostory->add($transaction);
         });
+
+        $this->eventPublisher->publish(new Event(
+            Event::TYPE_DEPOSIT,
+            $depositRequest->getAccountId(),
+            $depositRequest->getAmount())
+        );
     }
 }

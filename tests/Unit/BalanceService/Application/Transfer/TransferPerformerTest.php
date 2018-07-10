@@ -10,20 +10,24 @@ use Iqoption\BalanceService\Application\Transfer\TransferPerformer;
 use Iqoption\BalanceService\Application\Transfer\TransferRequest;
 use Iqoption\BalanceService\Common\Money;
 use Iqoption\BalanceService\Domain\Account\Account;
-use Iqoption\BalanceService\Domain\Entry;
-use Iqoption\BalanceService\Domain\Transaction;
+use Iqoption\BalanceService\Domain\Event\Event;
+use Iqoption\BalanceService\Domain\Event\EventPublisher;
+use Iqoption\BalanceService\Domain\Transaction\Entry;
+use Iqoption\BalanceService\Domain\Transaction\Transaction;
 use Iqoption\BalanceService\Infrastructure\Persistence\DoctrineBalanceCalculator;
 use Iqoption\BalanceService\Infrastructure\Persistence\DoctrineTransactionManager;
 use Iqoption\Test\TestUtility\DoctrineSqliteTestCase;
 use Iqoption\Test\Unit\BalanceService\AccountAwareTestCase;
 use Iqoption\Test\Unit\BalanceService\BalanceAwareTestCase;
+use Iqoption\Test\Unit\BalanceService\EventPublisherAwareTestCase;
 use Iqoption\Test\Unit\BalanceService\TransactionAwareTestCase;
 
-class TransferPerformerTest extends DoctrineSqliteTestCase
+class TransferPerformerTest extends DoctrineSqliteTestCase implements EventPublisher
 {
     use AccountAwareTestCase;
     use TransactionAwareTestCase;
     use BalanceAwareTestCase;
+    use EventPublisherAwareTestCase;
 
     /**
      * @var TransferPerformer
@@ -40,7 +44,8 @@ class TransferPerformerTest extends DoctrineSqliteTestCase
             new DoctrineBalanceCalculator(self::$entityManager),
             new DoctrineTransactionManager(
                 self::$entityManager
-            )
+            ),
+            $this
         );
     }
 
@@ -96,9 +101,12 @@ class TransferPerformerTest extends DoctrineSqliteTestCase
         $this->assertThatTransactionPersisted($transactionId, [
             'type' => Transaction::TYPE_TRANSFER,
             'createdAt' => $now,
+            'amount' => $amount
         ]);
         $this->assertThatAccountHasCertainBalance($fromAccountId, new Money(0, 'RUB'));
         $this->assertThatAccountHasCertainBalance($toAccountId, $amount);
+        $this->assertThatCertainEventPublished(new Event(Event::TYPE_WITHDRAW, $fromAccountId, $amount));
+        $this->assertThatCertainEventPublished(new Event(Event::TYPE_DEPOSIT, $toAccountId, $amount));
     }
 
     /**

@@ -6,7 +6,7 @@ namespace Iqoption\Test\Unit\BalanceService;
 use Iqoption\BalanceService\Common\Money;
 use Iqoption\BalanceService\Domain\Account\Account;
 use Iqoption\BalanceService\Domain\Account\NominalAccount;
-use Iqoption\BalanceService\Domain\Entry;
+use Iqoption\BalanceService\Domain\Transaction\Entry;
 
 trait BalanceAwareTestCase
 {

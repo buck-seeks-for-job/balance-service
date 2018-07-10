@@ -1,10 +1,13 @@
 <?php
 declare(strict_types=1);
 
-namespace Iqoption\BalanceService\Domain;
+namespace Iqoption\BalanceService\Domain\Transaction;
 
 use Doctrine\ORM\Mapping as ORM;
 use Iqoption\BalanceService\Common\Money;
+use Iqoption\BalanceService\Domain\Event\Event;
+use Iqoption\BalanceService\Domain\Event\EventPublisher;
+use Iqoption\BalanceService\Domain\Transaction\Entry;
 
 /**
  * @ORM\Entity(repositoryClass="Iqoption\BalanceService\Infrastructure\Persistence\DoctrineTransactionRepository")
@@ -39,9 +42,16 @@ class Transaction
     private $createdAt;
 
     /**
+     * @var Money
+     *
+     * @ORM\Embedded(class="Iqoption\BalanceService\Common\Money")
+     */
+    private $amount;
+
+    /**
      * @var Entry[]
      *
-     * @ORM\OneToMany(targetEntity="Iqoption\BalanceService\Domain\Entry", mappedBy="transaction", cascade={"ALL"})
+     * @ORM\OneToMany(targetEntity="Iqoption\BalanceService\Domain\Transaction\Entry", mappedBy="transaction", cascade={"ALL"})
      */
     private $entries = [];
 
@@ -65,6 +75,7 @@ class Transaction
         $this->id = $id;
         $this->type = $type;
         $this->createdAt = new \DateTimeImmutable('now');
+        $this->amount = $amount;
         $this->entries[] = new Entry($fromAccountId, $amount->inverse(), $this->createdAt, $this);
         $this->entries[] = new Entry($toAccountId, $amount, $this->createdAt, $this);
     }

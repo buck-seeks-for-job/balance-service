@@ -6,7 +6,9 @@ namespace Iqoption\BalanceService\Application\Transfer;
 use Iqoption\BalanceService\Domain\Account\AccountRepository;
 use Iqoption\BalanceService\Domain\BalanceCalculator;
 use Iqoption\BalanceService\Domain\DatabaseTransactionManager;
-use Iqoption\BalanceService\Domain\TransactionRepostory;
+use Iqoption\BalanceService\Domain\Event\Event;
+use Iqoption\BalanceService\Domain\Event\EventPublisher;
+use Iqoption\BalanceService\Domain\Transaction\TransactionRepostory;
 
 class TransferPerformer
 {
@@ -21,25 +23,33 @@ class TransferPerformer
     private $transactionRepository;
 
     /**
+     * @var BalanceCalculator
+     */
+    private $balanceCalculator;
+
+    /**
      * @var DatabaseTransactionManager
      */
     private $databaseTransactionManager;
 
     /**
-     * @var BalanceCalculator
+     * @var EventPublisher
      */
-    private $balanceCalculator;
+    private $eventPublisher;
 
     public function __construct(
         AccountRepository $accountRepository,
         TransactionRepostory $transactionRepository,
         BalanceCalculator $balanceCalculator,
-        DatabaseTransactionManager $databaseTransactionManager
-    ) {
+        DatabaseTransactionManager $databaseTransactionManager,
+        EventPublisher $eventPublisher
+    )
+    {
         $this->accountRepository = $accountRepository;
         $this->transactionRepository = $transactionRepository;
         $this->balanceCalculator = $balanceCalculator;
         $this->databaseTransactionManager = $databaseTransactionManager;
+        $this->eventPublisher = $eventPublisher;
     }
 
     public function transfer(TransferRequest $transferRequest): void
@@ -57,5 +67,21 @@ class TransferPerformer
 
             $this->transactionRepository->add($transaction);
         });
+        $this->publishEvents($transferRequest);
+    }
+
+    private function publishEvents(TransferRequest $transferRequest): void
+    {
+        $this->eventPublisher->publish(new Event(
+                Event::TYPE_WITHDRAW,
+                $transferRequest->getFromAccountId(),
+                $transferRequest->getAmount())
+        );
+
+        $this->eventPublisher->publish(new Event(
+                Event::TYPE_DEPOSIT,
+                $transferRequest->getToAccountId(),
+                $transferRequest->getAmount())
+        );
     }
 }

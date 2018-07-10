@@ -7,7 +7,7 @@ use Doctrine\ORM\EntityManager;
 use Iqoption\BalanceService\Common\Money;
 use Iqoption\BalanceService\Domain\Account\Account;
 use Iqoption\BalanceService\Domain\BalanceCalculator;
-use Iqoption\BalanceService\Domain\Entry;
+use Iqoption\BalanceService\Domain\Transaction\Entry;
 
 class DoctrineBalanceCalculator implements BalanceCalculator
 {
