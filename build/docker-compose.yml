@@ -1,10 +1,5 @@
 version: '3'
 
-#networks:
-#  default:
-#    external:
-#      name: iqoption
-
 services:
   balance-service-postgres:
     image: postgres:10
@@ -34,13 +29,25 @@ services:
   balance-service-php-cli:
     build:
       context: ../
-      dockerfile: build/php/Dockerfile
+      dockerfile: build/worker/Dockerfile
+    depends_on:
+      - balance-service-postgres
+      - balance-service-rabbitmq
+    volumes:
+      - ../:/var/balance-service/
+    env_file:
+      - parameters.env
+
+  balance-service-composer:
+#    image: composer:latest
+    build:
+      context: ../
+      dockerfile: build/composer/Dockerfile
     depends_on:
       - balance-service-postgres
     volumes:
-      - ../:/var/billing/
+      - ../:/app
       - $SSH_AUTH_SOCK:/tmp/agent.sock
     environment:
       - SSH_AUTH_SOCK=/tmp/agent.sock
-    env_file:
-      - parameters.env
+    command: install

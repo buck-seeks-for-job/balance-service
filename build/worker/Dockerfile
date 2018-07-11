@@ -12,12 +12,12 @@ RUN apk add --no-cache --virtual .build-deps g++ autoconf make \
     && echo "xdebug.remote_autostart=on" >> /usr/local/etc/php/conf.d/xdebug.ini \
     && echo "xdebug.remote_connect_back=on" >> /usr/local/etc/php/conf.d/xdebug.ini
 
-COPY build/php/git_ssh /usr/bin/git_ssh
-ENV GIT_SSH /usr/bin/git_ssh
+#COPY build/worker/git_ssh /usr/bin/git_ssh
+#ENV GIT_SSH /usr/bin/git_ssh
 
-RUN rm /usr/local/etc/php-fpm.d/zz-docker.conf
+#RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+#RUN composer global require hirak/prestissimo
 
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
-RUN composer global require hirak/prestissimo
+COPY build/worker/php.ini /usr/local/etc/php/php.ini
 
-COPY build/php/php.ini /usr/local/etc/php/php.ini
+ENTRYPOINT ["php", "bin/console", "iqoption:queue:listen", "--env=prod"]
