@@ -27,3 +27,41 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+
+    iqoption.account_repository:
+        class: Iqoption\BalanceService\Infrastructure\Persistence\DoctrineAccountRepository
+        factory: ["@doctrine.orm.entity_manager", getRepository]
+        arguments: [Iqoption\BalanceService\Domain\Account\Account]
+
+    Iqoption\BalanceService\Domain\Account\AccountRepository:
+        alias: iqoption.account_repository
+
+    iqoption.transaction_repository:
+        class: Iqoption\BalanceService\Infrastructure\Persistence\DoctrineTransactionRepository
+        factory: ["@doctrine.orm.entity_manager", getRepository]
+        arguments: [Iqoption\BalanceService\Domain\Transaction\Transaction]
+
+    Iqoption\BalanceService\Domain\Transaction\TransactionRepostory:
+        alias: iqoption.transaction_repository
+
+    iqoption.database_transaction_manager:
+        class: Iqoption\BalanceService\Infrastructure\Persistence\DoctrineTransactionManager
+        arguments:
+            - "@doctrine.orm.entity_manager"
+
+    Iqoption\BalanceService\Domain\DatabaseTransactionManager:
+        alias: iqoption.database_transaction_manager
+
+    iqoption.event_publisher:
+        class: Iqoption\BalanceService\Infrastructure\Amqp\AmqpEventPublisher
+
+    Iqoption\BalanceService\Domain\Event\EventPublisher:
+        alias: iqoption.event_publisher
+
+    iqoption.balance_calculator:
+        class: Iqoption\BalanceService\Infrastructure\Persistence\DoctrineBalanceCalculator
+        arguments:
+            - "@doctrine.orm.entity_manager"
+
+    Iqoption\BalanceService\Domain\BalanceCalculator:
+        alias: iqoption.balance_calculator
