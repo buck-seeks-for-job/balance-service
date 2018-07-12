@@ -13,6 +13,8 @@ services:
       POSTGRES_DB: balance
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin
+    ports:
+      - "5432:5432"
 
   balance-service-rabbitmq:
     image: rabbitmq:3.6-management-alpine
@@ -39,7 +41,6 @@ services:
       - parameters.env
 
   balance-service-composer:
-#    image: composer:latest
     build:
       context: ../
       dockerfile: build/composer/Dockerfile
@@ -51,3 +52,5 @@ services:
     environment:
       - SSH_AUTH_SOCK=/tmp/agent.sock
     command: install
+    env_file:
+      - parameters.env
