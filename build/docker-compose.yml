@@ -35,6 +35,7 @@ services:
     depends_on:
       - balance-service-postgres
       - balance-service-rabbitmq
+      - balance-service-composer
     volumes:
       - ../:/var/balance-service/
     env_file:
