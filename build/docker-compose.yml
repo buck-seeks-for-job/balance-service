@@ -47,6 +47,7 @@ services:
       dockerfile: build/composer/Dockerfile
     depends_on:
       - balance-service-postgres
+      - balance-service-rabbitmq
     volumes:
       - ../:/app
       - $SSH_AUTH_SOCK:/tmp/agent.sock

@@ -65,3 +65,40 @@ services:
 
     Iqoption\BalanceService\Domain\BalanceCalculator:
         alias: iqoption.balance_calculator
+
+    default.amqp.connection:
+        class: PhpAmqpLib\Connection\AMQPLazyConnection
+        arguments:
+            - '%env(RABBITMQ_HOST)%'
+            - '%env(RABBITMQ_PORT)%'
+            - '%env(RABBITMQ_DEFAULT_USER)%'
+            - '%env(RABBITMQ_DEFAULT_PASS)%'
+            - '%env(RABBITMQ_DEFAULT_VHOST)%'
+
+    PhpAmqpLib\Connection\AMQPLazyConnection:
+        alias: default.amqp.connection
+
+    iqoption.default_amqp_consumer_gateway:
+        class: Iqoption\BalanceService\Infrastructure\Amqp\DefaultAmqpConsumerGateway
+        arguments:
+            - '@default.amqp.connection'
+
+    Iqoption\BalanceService\Infrastructure\Amqp\AmqpConsumerGatewayInterface:
+        alias: iqoption.default_amqp_consumer_gateway
+
+    iqoption.queue_listener_command.logger:
+        class: Monolog\Logger
+        arguments:
+            - 'QueueListenerErrors'
+
+    Iqoption\BalanceService\Infrastructure\Presentation\Command\QueueListenerCommand:
+        arguments:
+            - '@Iqoption\BalanceService\Application\Deposit\DepositPerformer'
+            - '@Iqoption\BalanceService\Application\Withdraw\WithdrawPerformer'
+            - '@Iqoption\BalanceService\Application\Transfer\TransferPerformer'
+            - '@iqoption.default_amqp_consumer_gateway'
+            - '@jms_serializer.serializer'
+            - '@iqoption.queue_listener_command.logger'
+
+    JMS\Serializer\Serializer:
+        alias: jms_serializer.serializer
