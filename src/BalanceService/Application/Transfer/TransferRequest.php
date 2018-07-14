@@ -4,26 +4,31 @@ declare(strict_types=1);
 namespace Iqoption\BalanceService\Application\Transfer;
 
 use Iqoption\BalanceService\Common\Money;
+use JMS\Serializer\Annotation as JMS;
 
 class TransferRequest
 {
     /**
      * @var string
+     * @JMS\Type("string")
      */
     private $transactionId;
 
     /**
      * @var int
+     * @JMS\Type("integer")
      */
     private $fromAccountId;
 
     /**
      * @var int
+     * @JMS\Type("integer")
      */
     private $toAccountId;
 
     /**
      * @var Money
+     * @JMS\Type("Iqoption\BalanceService\Common\Money")
      */
     private $amount;
 

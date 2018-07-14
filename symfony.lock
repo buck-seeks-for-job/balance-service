@@ -1,4 +1,7 @@
 {
+    "beberlei/assert": {
+        "version": "v3.0.0"
+    },
     "doctrine/annotations": {
         "version": "1.0",
         "recipe": {
