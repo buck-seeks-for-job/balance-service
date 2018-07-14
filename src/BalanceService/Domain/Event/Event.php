@@ -5,7 +5,7 @@ namespace Iqoption\BalanceService\Domain\Event;
 
 use Iqoption\BalanceService\Common\Money;
 
-class Event
+class Event implements \JsonSerializable
 {
     public const TYPE_DEPOSIT = 'deposit';
     public const TYPE_WITHDRAW = 'withdraw';
@@ -30,5 +30,17 @@ class Event
         $this->type = $type;
         $this->accountId = $accountId;
         $this->amount = $amount;
+    }
+
+    public function jsonSerialize()
+    {
+        return [
+            'type' => $this->type,
+            'accountId' => $this->accountId,
+            'amount' => [
+                'amount' => $this->amount->getAmount(),
+                'currency' => $this->amount->getCurrency()
+            ]
+        ];
     }
 }
