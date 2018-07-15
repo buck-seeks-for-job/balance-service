@@ -28,14 +28,13 @@ services:
       RABBITMQ_DEFAULT_PASS: admin
       RABBITMQ_DEFAULT_VHOST: balance-service
 
-  balance-service-php-cli:
+  balance-service-worker:
     build:
       context: ../
       dockerfile: build/worker/Dockerfile
     depends_on:
       - balance-service-postgres
       - balance-service-rabbitmq
-      - balance-service-composer
     volumes:
       - ../:/var/balance-service/
     env_file:
@@ -54,5 +53,26 @@ services:
     environment:
       - SSH_AUTH_SOCK=/tmp/agent.sock
     command: install
+    env_file:
+      - parameters.env
+
+  balance-service-php-cli:
+    build:
+      context: ../
+      dockerfile: build/php-cli/Dockerfile
+    depends_on:
+      - balance-service-postgres
+      - balance-service-rabbitmq
+    volumes:
+      - ../:/var/balance-service/
+    env_file:
+      - parameters.env
+
+  balance-service-php-cli-no-deps:
+    build:
+      context: ../
+      dockerfile: build/php-cli/Dockerfile
+    volumes:
+      - ../:/var/balance-service/
     env_file:
       - parameters.env
