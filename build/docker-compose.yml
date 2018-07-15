@@ -60,18 +60,6 @@ services:
     build:
       context: ../
       dockerfile: build/php-cli/Dockerfile
-    depends_on:
-      - balance-service-postgres
-      - balance-service-rabbitmq
-    volumes:
-      - ../:/var/balance-service/
-    env_file:
-      - parameters.env
-
-  balance-service-php-cli-no-deps:
-    build:
-      context: ../
-      dockerfile: build/php-cli/Dockerfile
     volumes:
       - ../:/var/balance-service/
     env_file:
