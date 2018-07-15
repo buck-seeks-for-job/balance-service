@@ -54,6 +54,8 @@ services:
 
     iqoption.event_publisher:
         class: Iqoption\BalanceService\Infrastructure\Amqp\AmqpEventPublisher
+        arguments:
+            - '@default.amqp.connection'
 
     Iqoption\BalanceService\Domain\Event\EventPublisher:
         alias: iqoption.event_publisher

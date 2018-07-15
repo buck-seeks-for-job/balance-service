@@ -1,0 +1,24 @@
+services:
+    iqoption.default_amqp_consumer_gateway:
+        class: Iqoption\Test\Stubs\AmqpConsumerGatewayStub
+        public: true
+
+    iqoption.event_publisher:
+        class: Iqoption\Test\Stubs\EventPublisherStub
+        public: true
+
+    Iqoption\BalanceService\Application\Deposit\DepositPerformer:
+        autowire: true
+        autoconfigure: true
+        public: true
+
+    iqoption.queue_listener_command.logger:
+        class: Monolog\Logger
+        arguments:
+            - 'QueueListenerErrors'
+        calls:
+            - [pushHandler, ['@iqoption.queue_listener_command.logger_test_handler']]
+
+    iqoption.queue_listener_command.logger_test_handler:
+        public: true
+        class: Monolog\Handler\TestHandler

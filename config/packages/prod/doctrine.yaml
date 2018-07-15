@@ -1,4 +1,12 @@
 doctrine:
+    dbal:
+        driver: pdo_pgsql
+        host: '%env(DATABASE_HOST)%'
+        port: '%env(DATABASE_PORT)%'
+        dbname: '%env(DATABASE_NAME)%'
+        user: '%env(DATABASE_USER)%'
+        password: '%env(DATABASE_PASSWORD)%'
+        charset: UTF8
     orm:
         metadata_cache_driver:
             type: service
